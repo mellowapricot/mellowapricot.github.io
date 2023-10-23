@@ -121,6 +121,7 @@ body {
 
 .wrap {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 
@@ -131,7 +132,7 @@ body {
 .hello {
     margin:30px 0;
 
-    font-size: 20px;
+    font-size: 30px;
 }
 
 .list-container {
