@@ -1,5 +1,5 @@
 function fetchSvgSprite() {
-    const iconUrl = "/solar-icon.svg";
+    const iconUrl = "https://mellowapricot.github.io/solariconset/solar-icon.svg";
     fetch(iconUrl)
     .then((response) => response.text())
         .then((svgText) => {
