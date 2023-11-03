@@ -9,7 +9,6 @@ function fetchSvgSprite() {
 };
 fetchSvgSprite();
 
-
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
         generateIconList();
