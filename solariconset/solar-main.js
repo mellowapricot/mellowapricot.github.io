@@ -52,27 +52,39 @@ function createIconGroupContainer(parentGroup) {
 }
 
 function createIconItem(iconTitle, displayedIconTitle) {
-    const iconWrap = document.createElement("button");
-    iconWrap.classList.add("icon-item");
-
-    const itemTitle = document.createElement("span");
-    itemTitle.classList.add("item-title", iconTitle);
-    itemTitle.textContent = displayedIconTitle;
-
-    const newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    newSvg.classList.add("solar-icon");
-    newSvg.setAttribute("width", "24");
-    newSvg.setAttribute("height", "24");
-    newSvg.setAttribute("viewBox", "0 0 24 24");
-
-    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
-    use.setAttribute("href", `#${iconTitle}`);
-    newSvg.appendChild(use);
+    const iconWrap = createIconBtn();
+    const itemTitle = createItemTitleSpan(iconTitle, displayedIconTitle);
+    const newSvg = createSvgElement(iconTitle);
 
     iconWrap.appendChild(newSvg);
     iconWrap.appendChild(itemTitle);
 
     return iconWrap;
+}
+
+function createIconBtn() {
+    const button = document.createElement("button");
+    button.classList.add("icon-item");
+    return button;
+}
+
+function createItemTitleSpan(iconTitle, displayedText) {
+    const span = document.createElement("span");
+    span.classList.add("item-title", iconTitle);
+    span.textContent = displayedText;
+    return span;
+}
+
+function createSvgElement(iconTitle) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("solar-icon");
+    svg.setAttribute("width", "24");
+    svg.setAttribute("height", "24");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    use.setAttribute("href", `#${iconTitle}`);
+    svg.appendChild(use);
+    return svg;
 }
 
 function showPopUp(iconName) {
@@ -89,37 +101,53 @@ function showPopUp(iconName) {
 }
 
 function createPopUpWrap(iconName) {
-    const popUpWrap = document.createElement("div");
-    popUpWrap.classList.add("pop-up-wrap");
-    
-    const popUp = document.createElement("div");
-    popUp.classList.add("pop-up");
+    const popUpWrap = createDivClass("pop-up-wrap");
+    const popUp = createDivClass("pop-up");
+    const popUpInner = createDivClass("pop-up-inner");
+    const popUpTitle = createDivText("pop-up-title", iconName);
+    const popUpMarkup = createPopUpMarkup(iconName);
+    const popUpIcon = createPopUpIcon(iconName);
 
-    const popUpInner = document.createElement("div");
-    popUpInner.classList.add("pop-up-inner");
-    
-    const popUpTitle = document.createElement("div");
-    popUpTitle.classList.add("pop-up-title");
-    popUpTitle.textContent = iconName;
-    
-    const popUpMarkup = document.createElement("div");
-    popUpMarkup.classList.add("pop-up-markup");
-    popUpMarkup.insertAdjacentHTML("beforeend", `<pre><code>&lt;svg class="solar-icon" width="24" height="24" viewBox="0 0 24 24"&gt;&lt;use href="#${iconName}"&gt;&lt;/use&gt;&lt;/svg&gt;</code></pre>`);
+    assemblePopUp(popUp, popUpInner, popUpIcon, popUpTitle, popUpMarkup);
+    popUpWrap.appendChild(popUp);
 
-    const popUpIcon = document.createElement("div");
-    popUpIcon.classList.add("pop-up-icon");
-    popUpIcon.insertAdjacentHTML("beforeend", `<svg class="solar-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#${iconName}"></use></svg>`);
+    addCopyBtn(popUpTitle);
+    addCopyBtn(popUpMarkup);
 
+    return popUpWrap;
+}
+
+function createDivClass(className) {
+    const div = document.createElement("div");
+    div.classList.add(className);
+    return div;
+}
+
+function createDivText(className, text) {
+    const div = createDivClass(className);
+    div.textContent = text;
+    return div;
+}
+
+function createPopUpMarkup(iconName) {
+    const markup = createDivClass("pop-up-markup");
+    const svgMarkup = `<pre><code>&lt;svg class="solar-icon" width="24" height="24" viewBox="0 0 24 24"&gt;&lt;use href="#${iconName}"&gt;&lt;/use&gt;&lt;/svg&gt;</code></pre>`;
+    markup.insertAdjacentHTML("beforeend", svgMarkup);
+    return markup;
+}
+
+function createPopUpIcon(iconName) {
+    const iconDiv = createDivClass("pop-up-icon");
+    const svgIcon = `<svg class="solar-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#${iconName}"></use></svg>`;
+    iconDiv.insertAdjacentHTML("beforeend", svgIcon);
+    return iconDiv;
+}
+
+function assemblePopUp(popUp, popUpInner, popUpIcon, popUpTitle, popUpMarkup) {
     popUp.appendChild(popUpIcon);
     popUp.appendChild(popUpInner);
     popUpInner.appendChild(popUpTitle);
     popUpInner.appendChild(popUpMarkup);
-    popUpWrap.appendChild(popUp);
-
-    addCopyButtonToElement(popUpTitle);
-    addCopyButtonToElement(popUpMarkup);
-
-    return popUpWrap;
 }
 
 function addIconClickListener() {
@@ -132,65 +160,106 @@ function addIconClickListener() {
     });
 }
 
-function addCopyButtonToElement(element) {
-    const copyBtn = document.createElement("button");
-    copyBtn.setAttribute("type", "button");
-    copyBtn.classList.add("copy-btn");
-    copyBtn.insertAdjacentHTML("beforeend", `<svg class="solar-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#solar-clipboard-check-linear"></use></svg>`);
-
-    copyBtn.addEventListener("click", () => {
-        const textArea = document.createElement("textarea");
-        textArea.value = element.textContent;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        copyBtn.classList.add("complete");
-        const completeTextNode = document.createTextNode("Copy~!");
-        copyBtn.appendChild(completeTextNode);
-
-        setTimeout(() => {
-            copyBtn.classList.remove("complete");
-            copyBtn.removeChild(completeTextNode);
-        }, 2000);
-    });
-
+function addCopyBtn(element) {
+    const copyBtn = createCopyBtn();
+    attachCopyFunctionality(copyBtn, element);
     element.appendChild(copyBtn);
+}
+
+function createCopyBtn() {
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.classList.add("copy-btn");
+    copyBtn.insertAdjacentHTML("beforeend", `
+        <svg class="solar-icon" width="24" height="24" viewBox="0 0 24 24">
+            <use href="#solar-clipboard-check-linear"></use>
+        </svg>`
+    );
+    return copyBtn;
+}
+
+function attachCopyFunctionality(copyBtn, element) {
+    copyBtn.addEventListener("click", async () => {
+        try {
+            await copyTextToClipboard(element.textContent);
+            displayCopyConfirmation(copyBtn);
+        } catch (error) {
+            alert("다시 시도해주세요.");
+            console.error("Copy failed", error);
+        }
+    });
+}
+
+async function copyTextToClipboard(text) {
+    await navigator.clipboard.writeText(text);
+}
+
+function displayCopyConfirmation(copyBtn) {
+    copyBtn.classList.add("complete");
+    const copyMsg = document.createElement("span");
+    copyMsg.textContent = "Copied~!";
+    copyMsg.classList.add("copy-msg");
+    copyBtn.appendChild(copyMsg);
+
+    setTimeout(() => {
+        copyBtn.classList.remove("complete");
+        copyBtn.removeChild(copyMsg);
+    }, 2000);
 }
 
 function handleSearchForm() {
     const searchBtn = document.querySelector(".search-btn");
     const searchInput = document.querySelector(".search-input");
-    const icons = document.querySelectorAll(".icon-item");
 
-    searchBtn.addEventListener("click", enterSearch);
-    searchInput.addEventListener("input", enterSearch);
+    attachSearchListeners(searchBtn, searchInput);
+}
 
-    function enterSearch() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const iconGroups = document.querySelectorAll("[class^='icon-group-']")
-        iconGroups.forEach((group) => {
-            let hasVisibleIcons = false; 
+function attachSearchListeners(searchBtn, searchInput) {
+    searchBtn.addEventListener("click", executeSearch);
+    searchInput.addEventListener("input", executeSearch);
+}
 
-            const iconsInGroup = group.querySelectorAll(".icon-item");
-            iconsInGroup.forEach((icon) => {
-                const title = icon.querySelector(".item-title").textContent.toLowerCase();
-                const groupTitle = group.querySelector(".group-title").textContent.toLowerCase();
-                if (title.includes(searchTerm) || groupTitle.includes(searchTerm)) {
-                    icon.style.display = "flex";
-                    hasVisibleIcons = true; 
-                } else {
-                    icon.style.display = "none";
-                }
-            });
+function executeSearch() {
+    const searchTerm = getSearchTerm();
+    filterIconsByTerm(searchTerm);
+}
 
-            if (!hasVisibleIcons) {
-                group.style.display = "none";
-            } else {
-                group.style.display = "grid";
-            }
-        });
-    }
+function getSearchTerm() {
+    const searchInput = document.querySelector(".search-input");
+    return searchInput.value.toLowerCase();
+}
+
+function filterIconsByTerm(searchTerm) {
+    const iconGroups = document.querySelectorAll("[class^='icon-group-']");
+
+    iconGroups.forEach((group) => {
+        filterIconsInGroup(group, searchTerm);
+        toggleGroupVisibility(group);
+    });
+}
+
+function filterIconsInGroup(group, searchTerm) {
+    const icons = group.querySelectorAll(".icon-item");
+    let hasVisibleIcons = false;
+
+    icons.forEach((icon) => {
+        const isVisible = checkIconAgainstSearchTerm(icon, searchTerm);
+        icon.style.display = isVisible ? "flex" : "none";
+        hasVisibleIcons = hasVisibleIcons || isVisible;
+    });
+
+    group.dataset.hasVisibleIcons = hasVisibleIcons;
+}
+
+function toggleGroupVisibility(group) {
+    const hasVisibleIcons = group.dataset.hasVisibleIcons === "true";
+    group.style.display = hasVisibleIcons ? "grid" : "none";
+}
+
+function checkIconAgainstSearchTerm(icon, searchTerm) {
+    const title = icon.querySelector(".item-title").textContent.toLowerCase();
+    const groupTitle = icon.closest("[class^='icon-group-']").querySelector(".group-title").textContent.toLowerCase();
+    return title.includes(searchTerm) || groupTitle.includes(searchTerm);
 }
 
 function handleQuickGroup() {
